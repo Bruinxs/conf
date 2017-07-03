@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -355,5 +356,43 @@ func TestIniConfig_Set(t *testing.T) {
 	_, err = ic.Bool("k5")
 	if err == nil {
 		t.Errorf("err(%v) is nil", err)
+	}
+}
+
+func TestIniConfig_Val(t *testing.T) {
+	data := `
+	[def]
+	key1=val1
+	key2=2
+	[loc]
+	k1=v1
+	k2=${def.key2}0
+	`
+	ini := NewIniConfig()
+	_, err := ini.ParseData([]byte(data))
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	type args struct {
+		key string
+	}
+	tests := []struct {
+		name string
+		this *IniConfig
+		args args
+		want interface{}
+	}{
+		{"0", ini, args{"def.key1"}, "val1"},
+		{"1", ini, args{"k1"}, "v1"},
+		{"2", ini, args{"k2"}, "20"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.this.Val(tt.args.key); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("IniConfig.Val() = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }

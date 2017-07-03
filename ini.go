@@ -136,7 +136,10 @@ func (this *IniConfig) Set(key string, val interface{}) error {
 func (this *IniConfig) Val(key string) interface{} {
 	val, ok := this.dict[key]
 	if !ok {
-		val = os.Getenv(key)
+		val, ok = this.dict["loc."+key]
+		if !ok {
+			val = os.Getenv(key)
+		}
 	}
 	return val
 }
