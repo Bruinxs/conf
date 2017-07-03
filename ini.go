@@ -195,10 +195,11 @@ func (this *IniConfig) Bool(key string) (bool, error) {
 	case bool:
 		return v, nil
 	case string:
+		v = strings.ToLower(v)
 		switch v {
-		case "true", "True", "yes", "Yes", "1":
+		case "true", "yes", "1":
 			return true, nil
-		case "false", "False", "no", "No", "0":
+		case "false", "no", "0":
 			return false, nil
 		default:
 			return false, errors.New(fmt.Sprintf("value(%v), type(%v), key(%v) assert to bool fail", v, v, key))

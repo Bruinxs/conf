@@ -24,3 +24,7 @@ func Int(key string) int {
 func IntDef(key string, def int) int {
 	return defIniConfig.IntDef(key, def)
 }
+
+func Bool(key string) bool {
+	return defIniConfig.BoolDef(key, false)
+}
