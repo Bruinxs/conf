@@ -1,4 +1,4 @@
-package gconf
+package conf
 
 import (
 	"fmt"
@@ -15,6 +15,7 @@ func TestIniConfig_envH(t *testing.T) {
 	ic.Set("key1", "string value")
 	ic.Set("key2", 10)
 	ic.Set("key3", true)
+	ic.Set("key4", "")
 
 	vs := []struct {
 		Item string
@@ -26,9 +27,9 @@ func TestIniConfig_envH(t *testing.T) {
 		{"${key1}", "string value"},
 		{" ${key2}", "10"},
 		{" ${ key3}", "true"},
-		{"${key1 ,   key2 }", "string value10"},
-		{"${key1,   key2,key3}", "string value10true"},
-		{" ${  path}", os.Getenv("path")},
+		{"${key1 ,   key2 }", "string value"},
+		{"${key10,   key2,key3}", "10"},
+		{"${key4,key1}", ""},
 	}
 
 	for _, v := range vs {
@@ -101,7 +102,7 @@ func TestIniConfig_parseCommand(t *testing.T) {
 	}
 
 	key = "section1.key2"
-	slice := ic.Strings(key)
+	slice := ic.StrSlice(key)
 	if len(slice) != 5 {
 		t.Errorf("ic key(%v) return slice len(%v) not equal (%v)", key, len(slice), 5)
 	}
@@ -200,6 +201,7 @@ func TestIniConfig_Parse(t *testing.T) {
 			httpKey=100
 			[section1]
 			key1 = s1
+			key2 = 
 		`))
 	}))
 
@@ -228,7 +230,7 @@ func TestIniConfig_Parse(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if len(ic.dict) != 4 {
+	if len(ic.dict) != 5 {
 		t.Errorf("dict len(%v) not equal (%v)", len(ic.dict), 4)
 	}
 
@@ -248,6 +250,10 @@ func TestIniConfig_Parse(t *testing.T) {
 	if ic.String(key) != "s1" {
 		t.Errorf("ic key(%v) return val(%v) not equal (%v)", key, ic.String(key), "s1")
 	}
+	key = "section1.key2"
+	if ic.String(key) != "" {
+		t.Errorf("ic key(%v) return val(%v) not equal (%v)", key, ic.String(key), "s1")
+	}
 }
 
 func TestIniConfig_Set(t *testing.T) {
@@ -255,71 +261,71 @@ func TestIniConfig_Set(t *testing.T) {
 
 	//string
 	ic.Set("k1", nil)
-	sv := ic.OptString("k1", "v1")
+	sv := ic.StringDef("k1", "v1")
 	if sv != "v1" {
 		t.Errorf("key(%v) sv(%v) not equal (%v)", "k1", sv, "v1")
 	}
 	ic.Set("k1", "s1")
-	sv = ic.OptString("k1", "v1")
+	sv = ic.StringDef("k1", "v1")
 	if sv != "s1" {
 		t.Errorf("key(%v) sv(%v) not equal (%v)", "k1", sv, "s1")
 	}
 
 	//strings
-	ss := ic.OptStrings("k2", []string{"1", "2", "3", "4"})
+	ss := ic.StrSliceDef("k2", []string{"1", "2", "3", "4"})
 	if len(ss) != 4 {
 		t.Errorf("key(%v) ss(%v) illegal", "k2", ss)
 	}
 	ic.Set("k2", "s1,s2,s3")
-	ss = ic.OptStrings("k2", []string{"1", "2", "3", "4"})
+	ss = ic.StrSliceDef("k2", []string{"1", "2", "3", "4"})
 	if len(ss) != 3 {
 		t.Errorf("key(%v) ss(%v) illegal", "k2", ss)
 	}
 
 	//int and int64
 	ic.Set("k3", "fake1")
-	iv := ic.OptInt("k3", 10)
+	iv := ic.IntDef("k3", 10)
 	if iv != 10 {
 		t.Errorf("key(%v) iv(%v) not equal (%v)", "k3", iv, 10)
 	}
-	iv64 := ic.OptInt64("k3", 11)
+	iv64 := ic.Int64Def("k3", 11)
 	if iv64 != int64(11) {
 		t.Errorf("key(%v) iv64(%v) not equal (%v)", "k3", iv64, 11)
 	}
 	ic.Set("k3", 123)
-	iv = ic.OptInt("k3", 10)
+	iv = ic.IntDef("k3", 10)
 	if iv != 123 {
 		t.Errorf("key(%v) iv(%v) not equal (%v)", "k3", iv, 123)
 	}
-	iv64 = ic.OptInt64("k3", 11)
+	iv64 = ic.Int64Def("k3", 11)
 	if iv64 != int64(123) {
 		t.Errorf("key(%v) iv64(%v) not equal (%v)", "k3", iv64, 123)
 	}
 
 	//float
 	ic.Set("k4", "fake2")
-	fv := ic.OptFloat("k4", 10.10)
+	fv := ic.FloatDef("k4", 10.10)
 	if fv != 10.10 {
 		t.Errorf("key(%v) fv(%v) not equal (%v)", "k4", fv, 10.10)
 	}
 	ic.Set("k4", 11.11)
-	fv = ic.OptFloat("k4", 10.10)
+	fv = ic.FloatDef("k4", 10.10)
 	if fv != 11.11 {
 		t.Errorf("key(%v) fv(%v) not equal (%v)", "k4", fv, 11.11)
 	}
 
 	//bool
-	bv := ic.OptBool("k5", true)
+	bv := ic.BoolDef("k5", true)
 	if bv != true {
 		t.Errorf("key(%v) bv(%v) not equal (%v)", "k5", bv, true)
 	}
 	ic.Set("k5", false)
-	bv = ic.OptBool("k5", true)
+	bv = ic.BoolDef("k5", true)
 	if bv != false {
 		t.Errorf("key(%v) bv(%v) not equal (%v)", "k5", bv, false)
 	}
 	ic.Set("k5", "False")
-	bv = ic.OptBool("k5", true)
+	bv = ic.BoolDef("k5", true)
 	if bv != false {
 		t.Errorf("key(%v) bv(%v) not equal (%v)", "k5", bv, false)
 	}

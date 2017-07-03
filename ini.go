@@ -1,4 +1,4 @@
-package gconf
+package conf
 
 import (
 	"bufio"
@@ -19,7 +19,7 @@ type IniConfig struct {
 }
 
 var (
-	_ ConfigRaw    = new(IniConfig)
+	_ Config       = new(IniConfig)
 	_ ConfigParser = new(IniConfig)
 )
 
@@ -32,12 +32,15 @@ func (this *IniConfig) envH(str string) string {
 	if strings.Index(str, "${") > -1 {
 		pattern := regexp.MustCompile("\\$\\{.*\\}")
 		return pattern.ReplaceAllStringFunc(str, func(match string) string {
-			slice := strings.Split(strings.Trim(match, " ${}"), ",")
-			val := ""
-			for _, s := range slice {
-				val += this.String(strings.Trim(s, " "))
+			keys := strings.Split(strings.Trim(match, " ${}"), ",")
+			for _, k := range keys {
+				k = strings.Trim(k, " ")
+				val, ok := this.dict[k]
+				if ok {
+					return fmt.Sprintf("%v", val)
+				}
 			}
-			return val
+			return ""
 		})
 	}
 	return str
@@ -71,7 +74,7 @@ func (this *IniConfig) parseCommand(command string) error {
 	return errors.New(fmt.Sprintf("command(%v) is illegal", command))
 }
 
-func (this *IniConfig) Parse(filename string) (ConfigRaw, error) {
+func (this *IniConfig) Parse(filename string) (Config, error) {
 	filename = path.Clean(filename)
 	file, err := os.Open(filename)
 	defer func() {
@@ -90,7 +93,7 @@ func (this *IniConfig) Parse(filename string) (ConfigRaw, error) {
 	return this.ParseData(data)
 }
 
-func (this *IniConfig) ParseData(data []byte) (ConfigRaw, error) {
+func (this *IniConfig) ParseData(data []byte) (Config, error) {
 	scanner := bufio.NewScanner(bytes.NewReader(data))
 
 	var (
@@ -149,7 +152,7 @@ func (this *IniConfig) String(key string) string {
 	return fmt.Sprintf("%v", val)
 }
 
-func (this *IniConfig) Strings(key string) []string {
+func (this *IniConfig) StrSlice(key string) []string {
 	str := this.String(key)
 	if len(str) == 0 {
 		return nil
@@ -224,7 +227,7 @@ func (this *IniConfig) Float(key string) (float64, error) {
 	return fv, nil
 }
 
-func (this *IniConfig) OptString(key, defaultVal string) string {
+func (this *IniConfig) StringDef(key, defaultVal string) string {
 	str := this.String(key)
 	if str == "" {
 		return defaultVal
@@ -232,15 +235,15 @@ func (this *IniConfig) OptString(key, defaultVal string) string {
 	return str
 }
 
-func (this *IniConfig) OptStrings(key string, defaultVal []string) []string {
-	slice := this.Strings(key)
+func (this *IniConfig) StrSliceDef(key string, defaultVal []string) []string {
+	slice := this.StrSlice(key)
 	if len(slice) == 0 {
 		return defaultVal
 	}
 	return slice
 }
 
-func (this *IniConfig) OptInt(key string, defaultVal int) int {
+func (this *IniConfig) IntDef(key string, defaultVal int) int {
 	iv, err := this.Int(key)
 	if err != nil {
 		return defaultVal
@@ -248,7 +251,7 @@ func (this *IniConfig) OptInt(key string, defaultVal int) int {
 	return iv
 }
 
-func (this *IniConfig) OptInt64(key string, defaultVal int64) int64 {
+func (this *IniConfig) Int64Def(key string, defaultVal int64) int64 {
 	iv, err := this.Int64(key)
 	if err != nil {
 		return defaultVal
@@ -256,7 +259,7 @@ func (this *IniConfig) OptInt64(key string, defaultVal int64) int64 {
 	return iv
 }
 
-func (this *IniConfig) OptBool(key string, defaultVal bool) bool {
+func (this *IniConfig) BoolDef(key string, defaultVal bool) bool {
 	bv, err := this.Bool(key)
 	if err != nil {
 		return defaultVal
@@ -264,7 +267,7 @@ func (this *IniConfig) OptBool(key string, defaultVal bool) bool {
 	return bv
 }
 
-func (this *IniConfig) OptFloat(key string, defaultVal float64) float64 {
+func (this *IniConfig) FloatDef(key string, defaultVal float64) float64 {
 	fv, err := this.Float(key)
 	if err != nil {
 		return defaultVal
