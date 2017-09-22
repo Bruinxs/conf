@@ -27,7 +27,9 @@ func assignVariable(cfg Config, raw string) string {
 	val = varRegex.ReplaceAllStringFunc(raw, func(match string) string {
 		keys := strings.Split(strings.Trim(match, "${}"), ",")
 		for _, key := range keys {
-			if cfg.Exists(key) {
+			if strings.HasPrefix(key, "\"") && strings.HasSuffix(key, "\"") {
+				return strings.Trim(key, "\"")
+			} else if cfg.Exists(key) {
 				return cfg.String(key)
 			}
 		}

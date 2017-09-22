@@ -61,5 +61,18 @@ func TestIniConfig(t *testing.T) {
 			boolV = ini.DefaultBool("string_val", true)
 			So(boolV, ShouldBeTrue)
 		})
+
+		Convey("Test support define default value in config", func() {
+			strV := ini.String("default_val")
+			So(strV, ShouldEqual, "123")
+
+			intV, err := ini.Int("default_val")
+			So(err, ShouldBeNil)
+			So(intV, ShouldEqual, 123)
+
+			floatV, err := ini.Float("default_val")
+			So(err, ShouldBeNil)
+			So(floatV, ShouldEqual, 123)
+		})
 	})
 }
