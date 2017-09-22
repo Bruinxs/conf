@@ -65,12 +65,13 @@ func (ini *IniConfig) parse(section string, deep int, reader io.Reader) error {
 
 		if line[0] == '@' {
 			bys, err := runOrder(ini, line)
-			if err != nil {
+			if err != nil && err != ErrValueEmpty {
 				return err
-			}
-			err = ini.parse(section, deep+1, bytes.NewBuffer(bys))
-			if err != nil {
-				return err
+			} else if err == nil {
+				err = ini.parse(section, deep+1, bytes.NewBuffer(bys))
+				if err != nil {
+					return err
+				}
 			}
 			continue
 		}

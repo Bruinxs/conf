@@ -12,6 +12,9 @@ import (
 var (
 	//ErrLoadLoop appoint happen error when load remote config data may be in loop
 	ErrLoadLoop = errors.New("load may be in loop error")
+
+	//ErrValueEmpty a value is nil or empty
+	ErrValueEmpty = errors.New("value is empty")
 )
 
 var (
@@ -28,7 +31,7 @@ func assignVariable(cfg Config, raw string) string {
 				return cfg.String(key)
 			}
 		}
-		return match
+		return ""
 	})
 	return val
 }
@@ -37,10 +40,14 @@ func assignVariable(cfg Config, raw string) string {
 func runOrder(cfg Config, raw string) ([]byte, error) {
 	raw = strings.Trim(raw, "@ ")
 	vals := strings.Split(raw, ":")
+	commandVar := assignVariable(cfg, vals[1])
+	if commandVar == "" {
+		return nil, ErrValueEmpty
+	}
+
 	switch vals[0] {
 	case "load":
-		uri := assignVariable(cfg, vals[1])
-		return load(uri)
+		return load(commandVar)
 	}
 	return nil, fmt.Errorf("illegal order '%v'", vals[0])
 }
