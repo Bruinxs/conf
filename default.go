@@ -58,3 +58,7 @@ func DefaultBool(key string, defaultVal bool) bool {
 func DefaultFloat(key string, defaultVal float64) float64 {
 	return ini.DefaultFloat(key, defaultVal)
 }
+
+func PrintAll() {
+	ini.PrintAll()
+}

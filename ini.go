@@ -193,3 +193,9 @@ func (ini *IniConfig) DefaultFloat(key string, defaultVal float64) float64 {
 	}
 	return val
 }
+
+func (ini *IniConfig) PrintAll() {
+	for key, val := range ini.dict {
+		fmt.Println(key, "=", val)
+	}
+}
