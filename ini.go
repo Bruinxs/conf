@@ -44,6 +44,14 @@ func (ini *IniConfig) Parse(reader io.Reader) (Config, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	//print all configure value to debug
+	if ini.DefaultBool("print_all_conf", false) {
+		for key, val := range ini.dict {
+			fmt.Println(key, "=", val)
+		}
+	}
+
 	return ini, nil
 }
 
@@ -192,10 +200,4 @@ func (ini *IniConfig) DefaultFloat(key string, defaultVal float64) float64 {
 		return defaultVal
 	}
 	return val
-}
-
-func (ini *IniConfig) PrintAll() {
-	for key, val := range ini.dict {
-		fmt.Println(key, "=", val)
-	}
 }
