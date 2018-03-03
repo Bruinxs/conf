@@ -1,60 +1,60 @@
 package conf
 
-var ini = NewIniConfig()
+var def = NewIniConfig()
 
 //ParseFile open and read the ini file
 func ParseFile(file string) error {
-	_, err := ini.ParseFile(file)
+	_, err := def.ParseFile(file)
 	return err
 }
 
 func Exists(key string) bool {
-	return ini.Exists(key)
+	return def.Exists(key)
 }
 
 func String(key string) string {
-	return ini.String(key)
+	return def.String(key)
 }
 
 func Strings(key string) []string {
-	return ini.Strings(key)
+	return def.Strings(key)
 }
 
 func Int(key string) (int, error) {
-	return ini.Int(key)
+	return def.Int(key)
 }
 
 func Int64(key string) (int64, error) {
-	return ini.Int64(key)
+	return def.Int64(key)
 }
 
 func Bool(key string) (bool, error) {
-	return ini.Bool(key)
+	return def.Bool(key)
 }
 
 func Float(key string) (float64, error) {
-	return ini.Float(key)
+	return def.Float(key)
 }
 
 func DefaultString(key string, defaultVal string) string {
-	return ini.DefaultString(key, defaultVal)
+	return def.DefaultString(key, defaultVal)
 }
 func DefaultStrings(key string, defaultVal []string) []string {
-	return ini.DefaultStrings(key, defaultVal)
+	return def.DefaultStrings(key, defaultVal)
 }
 
 func DefaultInt(key string, defaultVal int) int {
-	return ini.DefaultInt(key, defaultVal)
+	return def.DefaultInt(key, defaultVal)
 }
 
 func DefaultInt64(key string, defaultVal int64) int64 {
-	return ini.DefaultInt64(key, defaultVal)
+	return def.DefaultInt64(key, defaultVal)
 }
 
 func DefaultBool(key string, defaultVal bool) bool {
-	return ini.DefaultBool(key, defaultVal)
+	return def.DefaultBool(key, defaultVal)
 }
 
 func DefaultFloat(key string, defaultVal float64) float64 {
-	return ini.DefaultFloat(key, defaultVal)
+	return def.DefaultFloat(key, defaultVal)
 }
