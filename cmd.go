@@ -47,6 +47,11 @@ func runOrder(cfg Config, raw string) ([]byte, error) {
 		return nil, ErrValueEmpty
 	}
 
+	//for debug
+	if cfg.DefaultBool("print_all_conf", false) {
+		fmt.Println(vals[0], "-->", commandVar)
+	}
+
 	switch vals[0] {
 	case "load":
 		return load(commandVar)
